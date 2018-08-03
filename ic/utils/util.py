@@ -18,7 +18,7 @@ import apt_pkg
 
 from . import log
 
-__version__ = (0, 0, 7, 6)
+__version__ = (0, 1, 1, 1)
 
 
 def who_am_i():
@@ -46,27 +46,27 @@ def check_python_library_version(LibName_, LibVer_=None, Compare_='=='):
     """
     import_cmd = 'import '+str(LibName_)
     try:
-        exec import_cmd
+        exec(import_cmd)
         import_lib = eval(LibName_)
     except ImportError:
         # Нет такой библиотеки
-        log.error('Check library <%s>' % LibName_)
+        log.error(u'Ошибка проверки установленной библиотеки <%s>' % LibName_)
         return False
 
     if Compare_ == '==' and LibVer_ is not None:
         # Проверка на сравнение
-        log.info('Python Library: <%s> Version: [%s]' % (LibName_, import_lib.__version__))
+        log.info(u'Библиотека Python <%s> версия [%s]' % (LibName_, import_lib.__version__))
         return bool(import_lib.__version__ == LibVer_)
     elif Compare_ in ('>=', '=>') and LibVer_ is not None:
         # Проверка на больше или равно
-        log.info('Python Library: <%s> Version: [%s]' % (LibName_, import_lib.__version__))
+        log.info(u'Библиотека Python <%s> версия [%s]' % (LibName_, import_lib.__version__))
         return version_compare_greate_equal(import_lib.__version__, LibVer_)
     elif Compare_ is None or LibVer_ is None:
         # Не надо проверять версию
         # достаточно того что библиотека установлена
         return True
     else:
-        log.warning('Not supported compare %s ' % Compare_)
+        log.warning(u'Не поддерживаемое сравнение %s' % Compare_)
     return False
 
 
@@ -111,10 +111,10 @@ def check_linux_package(PackageName_, Version_=None, Compare_='=='):
         None-система пакетов не определена.
     """
     if is_deb_linux():
-        log.debug('This Linux is Debian')
+        log.debug(u'ОС Linux определена как Debian совместимая')
         return check_deb_linux_package(PackageName_, Version_, Compare_)
     else:
-        log.debug('This linux is not Debian')
+        log.debug(u'ОС linux определена как Debian не совместимая')
     return None
 
 
@@ -132,7 +132,7 @@ def check_deb_linux_package(PackageName_, Version_=None, Compare_='=='):
         result = os.popen3(cmd)[1].readlines()
         return bool(result)
     except:
-        log.error('Check Debian installed package Error <%s>' % cmd)
+        log.error(u'Ошибка проверки Debian инсталлируемого пакета <%s>' % cmd)
         raise
     return None
 
@@ -155,7 +155,7 @@ def get_uname(Option_='-a'):
     try:
         return os.popen3(cmd)[1].readline()
     except:
-        log.error('Uname <%s>' % cmd)
+        log.error(u'Ошибка выполнения комманды Uname <%s>' % cmd)
         raise
     return None
 
@@ -183,7 +183,7 @@ def get_linux_name():
             cmd = 'cat /etc/release'
             return os.popen3(cmd)[1].readline().replace('\\n', '').replace('\\l', '').strip()
     except:
-        log.error('Get linux name')
+        log.error(u'Ошибка определения названия ОС Linux')
         raise
     return None
 
@@ -196,7 +196,7 @@ def is_apt_package_installed(package_name):
     """
     apt_pkg.init_config()
     apt_pkg.init_system()
-    return apt_pkg.Cache()[package_name].current_state == apt_pkg.CURSTATE_INSTALLED
+    return apt_pkg.Cache()[package_name].current_state == apt_pkg.INSTSTATE_REINSTREQ     # CURSTATE_INSTALLED
 
 
 UBUNTU_DESKTOP_PACKAGE_NAME = 'ubuntu-desktop'
@@ -247,7 +247,7 @@ def is_deb_linux():
     @return: Возвращает True/False.
     """
     linux_name = get_linux_name()
-    log.debug('Linux name: <%s>' % linux_name)
+    log.debug(u'Название ОС Linux <%s>' % linux_name)
     return bool([name for name in DEBIAN_LINUX_NAMES if name in linux_name])
 
 
@@ -260,7 +260,7 @@ def is_deb_linux_uname():
     @return: Возвращает True/False.
     """
     uname_result = get_uname()
-    return ('Ubuntu' in uname_result) or ('Debian' in uname_result)
+    return (u'Ubuntu' in uname_result) or (u'Debian' in uname_result)
 
 
 def get_dist_packages_path():
@@ -269,8 +269,8 @@ def get_dist_packages_path():
     (в зависимости от дистрибутива) Python.
     """
     python_stdlib_path = sysconfig.get_path('stdlib')
-    site_packages_path = os.path.normpath(python_stdlib_path+'/site-packages')
-    dist_packages_path = os.path.normpath(python_stdlib_path+'/dist-packages')
+    site_packages_path = os.path.normpath(os.path.join(python_stdlib_path, 'site-packages'))
+    dist_packages_path = os.path.normpath(os.path.join(python_stdlib_path, 'dist-packages'))
     if os.path.exists(site_packages_path):
         return site_packages_path
     elif os.path.exists(dist_packages_path):
@@ -288,7 +288,7 @@ def create_pth_file(PthFileName_, Path_):
     pth_file = None
     try:
         dist_packages_path = get_dist_packages_path()
-        pth_file_name = dist_packages_path+'/'+PthFileName_
+        pth_file_name = os.path.join(dist_packages_path, PthFileName_)
         pth_file = open(pth_file_name, 'wt')
         pth_file.write(Path_)
         pth_file.close()
@@ -298,8 +298,8 @@ def create_pth_file(PthFileName_, Path_):
         try:
             os.chmod(pth_file_name, stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
         except:
-            log.error('Chmod function in create_pth_file')
-        log.info('Create PTH file: <%s> path: <%s>' % (pth_file_name, Path_))
+            log.error(u'Ошибка выполнения комманды Chmod в create_pth_file')
+        log.info(u'Создание PTH файла <%s>. Путь <%s>' % (pth_file_name, Path_))
         return True
     except:
         if pth_file:
@@ -318,19 +318,20 @@ def unzip_to_dir(ZipFileName_, Dir_, bOverwrite=True, bConsole=True):
     @param bConsole: Вывод в консоль?
     @return: Возвращает результат выполнения операции True/False.
     """
+    unzip_cmd = u''
     try:
         overwrite = ''
         if bOverwrite:
             overwrite = '-o'
         unzip_cmd = 'unzip %s %s -d %s' % (overwrite, ZipFileName_, Dir_)
-        log.info('Unzip command <%s>' % unzip_cmd)
+        log.info(u'Unzip. Комманда разархивирования <%s>' % unzip_cmd)
         if bConsole:
             os.system(unzip_cmd)
             return None
         else:
             return os.popen3(unzip_cmd)
     except:
-        log.error('Unzip <%s>' % unzip_cmd)
+        log.error('Unzip. Ошибка разархивирования <%s>' % unzip_cmd)
         raise
     return None
 
@@ -354,7 +355,7 @@ def targz_extract_to_dir(TarFileName_, Dir_, bConsole=True):
                                                                                           TarFileName_, Dir_)
         else:
             targz_extract_cmd = 'tar --extract --verbose --directory="%s" --file=%s' % (Dir_, TarFileName_)
-        log.info('TarGz extract command: <%s> exists? <%s>' % (targz_extract_cmd, os.path.exists(TarFileName_)))
+        log.info(u'TarGz. Комманда разархивирования <%s>. Проверка наличия <%s>' % (targz_extract_cmd, os.path.exists(TarFileName_)))
         if bConsole:
             os.system(targz_extract_cmd)
             return None
@@ -366,7 +367,7 @@ def targz_extract_to_dir(TarFileName_, Dir_, bConsole=True):
             # дожидается процесса разархивирования
             return os.popen3(targz_extract_cmd)
     except:
-        log.fatal('TarGz Extract <%s>' % targz_extract_cmd)
+        log.fatal(u'TarGz. Ошибка разархивирования <%s>' % targz_extract_cmd)
         # raise
     return None
 
@@ -379,11 +380,11 @@ def deb_pkg_install(sDEBFileName):
     """
     deb_install_cmd = 'dpkg --install %s' % sDEBFileName
     try:
-        log.info('DEB package install command: <%s> exists? <%s>' % (deb_install_cmd, os.path.exists(sDEBFileName)))
+        log.info(u'Комманда инсталяции DEB пакета <%s>. Проверка наличия <%s>' % (deb_install_cmd, os.path.exists(sDEBFileName)))
         os.system(deb_install_cmd)
         return True
     except:
-        log.error('DEB package install Error <%s>' % deb_install_cmd)
+        log.error(u'Ошибка инсталляции DEB пакета <%s>' % deb_install_cmd)
         raise
     return None
 
@@ -394,16 +395,17 @@ def deb_pkg_uninstall(sDEBPackageName):
     @param sDEBPackageName: Имя пакета. Например dosemu.
     @return: Возвращает .
     """
+    deb_uninstall_cmd = u''
     try:
         if check_deb_package_install:
             deb_uninstall_cmd = 'dpkg --remove %s' % sDEBPackageName
-            log.info('DEB package uninstall command: <%s>' % deb_uninstall_cmd)
+            log.info(u'Комманда реинсталляции DEB пакета <%s>' % deb_uninstall_cmd)
             os.system(deb_uninstall_cmd)
             return deb_uninstall_cmd
         else:
             log.warning('Package <%s> not installed' % sDEBPackageName)
     except:
-        log.error('DEB package uninstall <%s>' % deb_uninstall_cmd)
+        log.error(u'Ошибка деинсталяции DEB пакета <%s>' % deb_uninstall_cmd)
         raise
     return None
 
@@ -487,7 +489,7 @@ def file_dlg(Title_='', Filter_='', DefaultPath_=''):
             main_win = app.GetTopWindow()
 
             wildcard = Filter_+'|All Files (*.*)|*.*'
-            dlg = wx.FileDialog(main_win, Title_, '', '', wildcard, wx.OPEN)
+            dlg = wx.FileDialog(main_win, Title_, '', '', wildcard, wx.FD_OPEN)
             if DefaultPath_:
                 dlg.SetDirectory(normpath(DefaultPath_, get_login()))
             else:
@@ -527,7 +529,7 @@ def check_dir(Dir_):
             os.makedirs(norm_dir)
             return True
         except:
-            log.error('Make directory <%s>' % norm_dir)
+            log.error(u'Ошибка создания директории <%s>' % norm_dir)
             return False
     else:
         return True
@@ -549,7 +551,7 @@ def save_file_txt(FileName_, Txt_=''):
     except:
         if file:
             file.close()
-        log.error('Save text file <%s>' % FileName_)
+        log.error(u'Ошибка сохранения текстового файла <%s>' % FileName_)
     return False
 
 
@@ -564,13 +566,14 @@ def copy_file_to(SrcFileName_, DstPath_, ReWrite_=True):
         DstPath_ = normpath(DstPath_, get_login())
         if not os.path.exists(DstPath_):
             os.makedirs(DstPath_)
-        dst_file_name = DstPath_+'/'+os.path.basename(SrcFileName_)
+        dst_file_name = os.path.join(DstPath_, os.path.basename(SrcFileName_))
         if ReWrite_:
             if os.path.exists(dst_file_name):
                 os.remove(dst_file_name)
         shutil.copyfile(SrcFileName_, dst_file_name)
         return True
     except:
+        log.fatal(u'Ошибка копирования файла <%s> в <%s>' % (SrcFileName_, DstPath_))
         return False
 
 
@@ -599,7 +602,7 @@ def set_chown_user(sPath, username):
     user_struct = pwd.getpwnam(username)
     uid = user_struct.pw_uid
     gid = user_struct.pw_gid
-    log.info(u'Set owner <%s> path <%s>' % (username, path))
+    log.info(u'Установка владельца <%s> для директоории <%s>' % (username, path))
     return os.chown(path, uid, gid)
 
 
@@ -646,10 +649,10 @@ def set_public_chmod_tree_cmd(sPath):
     path = normpath(sPath, get_login())
     if os.path.exists(path):
         try:
-            if isinstance(path, unicode):
-                path = path.encode(sys.getfilesystemencoding())
+            # if isinstance(path, unicode):
+            #    path = path.encode(sys.getfilesystemencoding())
             cmd = 'sudo chmod --recursive 777 "%s"' % path
-            log.info(u'Run command: <%s>' % unicode(cmd, sys.getfilesystemencoding()))
+            log.info(u'Запуск комманды ОС <%s>' % cmd)   # sys.getfilesystemencoding()))
             os.system(cmd)
             return True
         except:
@@ -679,7 +682,7 @@ def sym_link(sLinkPath, sLinkName, sUserName=None, bOverwrite=True):
     try:
         return os.symlink(link_path, link_name)
     except:
-        log.error('Create symbolic link <%s> -> <%s>' % (link_name, link_path))
+        log.error(u'Ошибка создания символической ссылки <%s> -> <%s>' % (link_name, link_path))
     return None
 
 
@@ -698,11 +701,11 @@ def get_options(lArgs=None):
     while lArgs:
         if lArgs[0][:2] == '--':
             if '=' in lArgs[0]:
-                # поиск пар “--name=value”
+                # поиск пар "--name=value"
                 i = lArgs[0].index('=')
                 opts[lArgs[0][:i]] = lArgs[0][i+1:]     # ключами словарей будут имена параметров
             else:
-                # поиск “--name”
+                # поиск "--name"
                 opts[lArgs[0]] = True   # ключами словарей будут имена параметров
         else:
             args.append(lArgs[0])
@@ -732,25 +735,25 @@ def text_file_append(sTextFileName, sText, CR='\n'):
     if os.path.exists(txt_filename):
         f = None
         try:
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             txt = f.read()
             txt += CR
             txt += sText
-            log.debug('Text file append <%s> in <%s>' % (sText, txt_filename))
+            log.debug(u'Добавление текста <%s> к файлу <%s>' % (sText, txt_filename))
             f.close()
             f = None
-            f = open(txt_filename, 'w')
+            f = open(txt_filename, 'wt')
             f.write(txt)
             f.close()
             f = None
             return True
         except:
-            log.error('Text file append in <%s>' % txt_filename)
+            log.error(u'Ошибка добавления текста к файлу <%s>' % txt_filename)
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -768,27 +771,27 @@ def text_file_replace(sTextFileName, sOld, sNew, bAutoAdd=True, CR='\n'):
     if os.path.exists(txt_filename):
         f = None
         try:
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             txt = f.read()
             txt = txt.replace(sOld, sNew)
             if bAutoAdd and (sNew not in txt):
                 txt += CR
                 txt += sNew
-                log.debug('Text file append <%s> in <%s>' % (sNew, txt_filename))
+                log.debug(u'Замена текста на <%s> в файле <%s>' % (sNew, txt_filename))
             f.close()
             f = None
-            f = open(txt_filename, 'w')
+            f = open(txt_filename, 'wt')
             f.write(txt)
             f.close()
             f = None
             return True
         except:
-            log.error('Text file replace in <%s>' % txt_filename)
+            log.error(u'Ошибка замены в текстовом файле <%s>' % txt_filename)
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -807,7 +810,7 @@ def text_file_find(sTextFileName, sFind, sFindMethod='in'):
     if os.path.exists(txt_filename):
         f = None
         try:
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             txt = f.read()
             result = False
             if sFindMethod == 'in':
@@ -820,12 +823,12 @@ def text_file_find(sTextFileName, sFind, sFindMethod='in'):
             f = None
             return result
         except:
-            log.error('Find <%s> in text file <%s>' % (sFind, txt_filename))
+            log.error(u'Ошибка поиска <%s> в текстовом файле <%s>' % (sFind, txt_filename))
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -847,7 +850,7 @@ def text_file_subreplace(sTextFileName, sSubStr, sNew, bAutoAdd=True, CR='\n', s
     if os.path.exists(txt_filename):
         f = None
         try:
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             lines = f.readlines()
             is_replace = False
             for i, line in enumerate(lines):
@@ -862,11 +865,11 @@ def text_file_subreplace(sTextFileName, sSubStr, sNew, bAutoAdd=True, CR='\n', s
                     is_replace = True
 
                 if is_replace:
-                    log.debug('Text file replace <%s> -> <%s> in <%s>' % (line, sNew, txt_filename))
+                    log.debug(u'Замена <%s> -> <%s> в текстовом файле <%s>' % (line, sNew, txt_filename))
             if bAutoAdd and not is_replace:
                 lines += [CR]
                 lines += [sNew]
-                log.debug('Text file append <%s> in <%s>' % (sNew, txt_filename))
+                log.debug(u'Добавление <%s> в текстовом файле <%s>' % (sNew, txt_filename))
             f.close()
             f = None
             f = open(txt_filename, 'w')
@@ -875,12 +878,12 @@ def text_file_subreplace(sTextFileName, sSubStr, sNew, bAutoAdd=True, CR='\n', s
             f = None
             return True
         except:
-            log.error('Text file sub replace in <%s>' % txt_filename)
+            log.error(u'Ошибка замены в текстовом файле <%s>' % txt_filename)
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -900,7 +903,7 @@ def text_file_subdelete(sTextFileName, sSubStr, sFindMethod='in'):
         f = None
         try:
             result_lines = []
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             lines = f.readlines()
             for line in lines:
                 if sFindMethod == 'in' and sSubStr not in line:
@@ -913,18 +916,18 @@ def text_file_subdelete(sTextFileName, sSubStr, sFindMethod='in'):
                     log.debug('Text file delete line <%s> from <%s>' % (line, txt_filename))
             f.close()
             f = None
-            f = open(txt_filename, 'w')
+            f = open(txt_filename, 'wt')
             f.writelines(result_lines)
             f.close()
             f = None
             return True
         except:
-            log.error('Text file sub delete in <%s>' % txt_filename)
+            log.error(u'Ошибка удаления в текстовом файле <%s>' % txt_filename)
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -946,7 +949,7 @@ def text_file_subdelete_between(sTextFileName, sSubStrStart, sSubStrStop, sFindM
         del_flag = False
         try:
             result_lines = []
-            f = open(txt_filename, 'r')
+            f = open(txt_filename, 'rt')
             lines = f.readlines()
             for line in lines:
                 if sFindMethod == 'in' and sSubStrStart in line:
@@ -959,7 +962,7 @@ def text_file_subdelete_between(sTextFileName, sSubStrStart, sSubStrStop, sFindM
                 if not del_flag:
                     result_lines.append(line)
                 else:
-                    log.debug('Text file delete line <%s> from <%s>' % (line, txt_filename))
+                    log.debug(u'Удаление строки <%s> из текстового файла <%s>' % (line, txt_filename))
 
                 if sFindMethod == 'in' and sSubStrStop in line:
                     del_flag = False
@@ -970,18 +973,18 @@ def text_file_subdelete_between(sTextFileName, sSubStrStart, sSubStrStop, sFindM
 
                 f.close()
             f = None
-            f = open(txt_filename, 'w')
+            f = open(txt_filename, 'wt')
             f.writelines(result_lines)
             f.close()
             f = None
             return True
         except:
-            log.fatal('Text file sub delete in <%s>' % txt_filename)
+            log.fatal(u'Ошибка удаления из текстового файла <%s>' % txt_filename)
             if f:
                 f.close()
                 f = None
     else:
-        log.warning('File <%s> not exists' % txt_filename)
+        log.warning(u'Файл <%s> не существует' % txt_filename)
     return False
 
 
@@ -1000,7 +1003,7 @@ def install_programm(dProgramm=None, LogManager=None):
     @return: True/False
     """
     if dProgramm is None:
-        log.warning('Not define programm for install')
+        log.warning(u'Не определены програмы для инсталляции')
         return False
 
     # Имя программы
@@ -1008,7 +1011,7 @@ def install_programm(dProgramm=None, LogManager=None):
 
     # Не инсталлировать уже инсталлированные пакеты
     is_installed = LogManager.is_installed_package(prg_name) if LogManager else False
-    log.info('Install <%s> ... %s' % (prg_name, not is_installed))
+    log.info(u'Инсталляция <%s> ... %s' % (prg_name, not is_installed))
     if not is_installed:
 
         install_dir = os.getcwd()
@@ -1016,15 +1019,15 @@ def install_programm(dProgramm=None, LogManager=None):
         if 'dir' in dProgramm:
             if dProgramm['dir'] is None:
                 install_dir = os.path.join(get_temp_dir(), prg_name)
-                log.warning('Don\'t set installation directory. Installation directory: <%s>' % install_dir)
+                log.warning(u'Не определена инсталляционная директория. Используется <%s>' % install_dir)
             else:
                 install_dir = normpath(dProgramm['dir'])
-                log.debug('Set installation directory <%s>' % install_dir)
+                log.debug(u'Установка инсталляционной директории <%s>' % install_dir)
 
         # Если перед инсталяцией инсталляционная папка определена
         # но такой папки на диске не , то создать ее
         if install_dir and not os.path.exists(install_dir):
-            log.info('Create installation directory <%s>' % install_dir)
+            log.info(u'Создание инсалляционной директории <%s>' % install_dir)
             os.makedirs(install_dir)
 
         # Определить папку пакета
@@ -1033,7 +1036,7 @@ def install_programm(dProgramm=None, LogManager=None):
             package_dir += '/'+dProgramm['package_dir']
             # если папка пакета уже существует, то удалить ее
             if os.path.exists(package_dir):
-                log.info('Delete package dir <%s>' % package_dir)
+                log.info(u'Удаление директории пакета <%s>' % package_dir)
                 shutil.rmtree(package_dir, 1)
 
         if dProgramm.get('programm', None) is None:
@@ -1079,7 +1082,7 @@ def create_pth_file_programm(dPth, sInstallDir):
         }
     """
     if dPth['dir'] is None:
-        dPth['dir'] = os.path.normpath(sInstallDir+'/'+dPth.get('package', ''))
+        dPth['dir'] = os.path.normpath(os.path.join(sInstallDir, dPth.get('package', '')))
 
     return create_pth_file(dPth['name'], dPth['dir'])
 
@@ -1092,18 +1095,18 @@ def remove_programm(dProgramm=None):
         for remove_name in dProgramm['remove']:
             if os.path.exists(remove_name):
                 if os.path.isfile(remove_name):
-                    log.info('Remove file <%s>' % remove_name)
+                    log.info(u'Удаление файла <%s>' % remove_name)
                     os.remove(remove_name)
                 elif os.path.isdir(remove_name):
-                    log.info('Remove directory <%s>' % remove_name)
+                    log.info(u'Удаление директории <%s>' % remove_name)
                     shutil.rmtree(remove_name)
             elif os.path.sep not in remove_name:
                 # Если нет разделителей папок в имени, значит это указание
                 # DEB пакета
                 cmd = deb_pkg_uninstall(remove_name)
-                log.info('Uninstall <%s> DEB package. Command <%s>' % (remove_name, cmd))
+                log.info(u'Деинсталяция DEB пакета <%s>. Комманда <%s>' % (remove_name, cmd))
             else:
-                log.warning('Not remove <%s>' % remove_name)
+                log.warning(u'Не удален <%s>' % remove_name)
 
 
 def unzip_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFAULT):
@@ -1111,7 +1114,7 @@ def unzip_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFAULT):
     Распаковать zip архив.
     """
     if dProgramm is None:
-        log.warning('Not define programm for unzip')
+        log.warning(u'Unzip. Не определен пакет дял разархивирования')
         return False
 
     remove_programm(dProgramm)
@@ -1120,15 +1123,15 @@ def unzip_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFAULT):
     if 'dir' in dProgramm:
         install_dir = dProgramm['dir']
     if install_dir is None:
-        log.warning('UNZIP. Not define install directory for programm <%s>' % dProgramm.get('name', None))
+        log.warning(u'Unzip. Не определена инсталяционная директория для пакета <%s>' % dProgramm.get('name', None))
         return False
 
     # Если инсталляционной папки нет, то создать ее
     if install_dir and not os.path.exists(install_dir):
-        log.info('Create install directory <%s>' % install_dir)
+        log.info(u'Создание инсталляционной директории <%s>' % install_dir)
         os.makedirs(install_dir)
 
-    zip_file_name = normpath('./'+sPackageDir+dProgramm['programm'])
+    zip_file_name = normpath(os.path.join('.', sPackageDir, dProgramm['programm']))
 
     console = dProgramm.get('console', True)
     return unzip_to_dir(zip_file_name, install_dir, bConsole=console)
@@ -1139,7 +1142,7 @@ def targz_extract_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFA
     Распаковать tar архив.
     """
     if dProgramm is None:
-        log.warning('Not define programm for tar extract')
+        log.warning(u'Targz. Не определен пакет для разархивирования')
         return False
 
     remove_programm(dProgramm)
@@ -1148,15 +1151,15 @@ def targz_extract_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFA
     if 'dir' in dProgramm:
         install_dir = normpath(dProgramm['dir'])
     if install_dir is None:
-        log.warning('TARGZ. Not define install directory for programm <%s>' % dProgramm.get('name', None))
+        log.warning(u'Targz. Не определена инсталляционная директория для пакета <%s>' % dProgramm.get('name', None))
         return False
 
     # Если инсталляционной папки нет, то создать ее
     if install_dir and not os.path.exists(install_dir):
-        log.info('Create install directory <%s>' % install_dir)
+        log.info(u'Создание инсталляционной директории <%s>' % install_dir)
         os.makedirs(install_dir)
 
-    tar_file_name = normpath('./'+sPackageDir+dProgramm['programm'])
+    tar_file_name = normpath(os.path.join('.', sPackageDir, dProgramm['programm']))
 
     console = dProgramm.get('console', True)
     return targz_extract_to_dir(tar_file_name, install_dir, bConsole=console)
@@ -1167,13 +1170,13 @@ def deb_install_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFAUL
     Установить DEB пакет.
     """
     if dProgramm is None:
-        log.warning('Not define programm for DEB install')
+        log.warning(u'Deb. Не определен пакет для инсталляции')
         return False
 
     # Если необходимо. то деинсталлировать пакеты
     remove_programm(dProgramm)
 
-    deb_file_name = normpath('./'+sPackageDir+dProgramm['programm'])
+    deb_file_name = normpath(os.path.join('.', sPackageDir, dProgramm['programm']))
 
     return deb_pkg_install(deb_file_name)
 
@@ -1186,7 +1189,7 @@ def uninstall_programms(lProgramms=None, LogManager=None):
     @return: True/False.
     """
     if lProgramms is None:
-        log.warning('Not define programms for uninstall')
+        log.warning(u'Не определены пакеты для деинсталляции')
         return False
 
     uninstalled_programms = []
@@ -1197,7 +1200,7 @@ def uninstall_programms(lProgramms=None, LogManager=None):
 
     # В конце вывести сообщение об деинстллированных пакетах
     txt = '\n'.join(uninstalled_programms)
-    log.info('Uninstall programms:')
+    log.info(u'Деинсталяция пакетов:')
     log.info(txt)
     return True
 
@@ -1210,7 +1213,7 @@ def uninstall_programm(dProgramm=None, LogManager=None):
     @return: True/False.
     """
     if dProgramm is None:
-        log.warning('Not define programm for uninstall')
+        log.warning(u'Не определен пакет для деинсталяции')
         return False
 
     # Имя программы
@@ -1220,7 +1223,7 @@ def uninstall_programm(dProgramm=None, LogManager=None):
         ok = LogManager.log_uninstall_package(prg_name) if LogManager else False
         yes_no = 'YES' if ok else 'NO'
         programm_name = dProgramm.get('programm', dProgramm.get('description', prg_name))
-        log.info('Uninstall programm <%s> ... %s' % (programm_name, yes_no))
+        log.info(u'Деинсталяция пакета <%s> ... %s' % (programm_name, yes_no))
         return ok
     return False
 
@@ -1232,9 +1235,9 @@ def exec_sys_command(sCommand):
     """
     try:
         os.system(sCommand)
-        log.info('Execute command: %s' % sCommand)
+        log.info(u'Выполнение команды ОС <%s>' % sCommand)
     except:
-        log.error('Execute command: %s' % sCommand)
+        log.error(u'Ошибка выполнения команды %s' % sCommand)
         raise
 
 
@@ -1245,36 +1248,34 @@ def targz_install_python_package(targz_package_filename=None):
     @return: True/False.
     """
     if not targz_package_filename:
-        log.warning('Not define TARGZ python package file.')
+        log.warning(u'Targz. Не определен файл пакета TARGZ python для инсталяции')
         return False
 
     if not os.path.exists(targz_package_filename):
-        log.warning('Not exists <%s> python package file.' % targz_package_filename)
+        log.warning(u'Не существует <%s> файл python пакета' % targz_package_filename)
         return False
 
-    log.info('''Start install python package.
-             TarGz filename <%s>''' % targz_package_filename)
+    log.info(u'Запуск инсталляции python пакета. Имя файла TarGz <%s>' % targz_package_filename)
 
     pkg_dir = os.path.dirname(targz_package_filename)
     set_public_chmod(pkg_dir)
     targz_extract_to_dir(targz_package_filename, pkg_dir)
 
     targz_basename = os.path.splitext(os.path.basename(targz_package_filename))[0]
-    setup_dir = os.path.normpath(pkg_dir+'/'+targz_basename)
-    setup_filename = os.path.normpath(setup_dir+'/setup.py')
+    setup_dir = os.path.normpath(os.path.join(pkg_dir, targz_basename))
+    setup_filename = os.path.normpath(os.path.join(setup_dir, 'setup.py'))
     if os.path.exists(setup_filename):
         cmd = 'cd %s; sudo python setup.py install' % setup_dir
-        log.info('Install <%s> library. Command <%s>' % (targz_basename, cmd))
+        log.info(u'Инсталяция библиотеки <%s>. Команда <%s>' % (targz_basename, cmd))
         os.system(cmd)
         # Удалить после инсталляции распакованный архив
         if os.path.exists(setup_dir):
             cmd = 'sudo rm -R %s' % setup_dir
-            log.info('Delete setup directory <%s>. Command <%s>' % (setup_dir,
-                                                                    cmd))
+            log.info(u'Удаление директории <%s>. Комманда <%s>' % (setup_dir, cmd))
             os.system(cmd)
         return True
     else:
-        log.warning('Don\'t exist setup.py file <%s>' % setup_filename)
+        log.warning(u'Не существует setup.py файл <%s>' % setup_filename)
     return False
 
 
@@ -1290,7 +1291,6 @@ def test():
     Функция тестирования.
     """
     result = get_options(['--dosemu=/home/user/.dosemu', '--option2', 'aaaa'])
-    print('TEST>>>', result)
 
 
 if __name__ == '__main__':

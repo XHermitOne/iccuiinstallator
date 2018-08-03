@@ -10,14 +10,17 @@ import os
 import os.path
 import shutil
 import datetime
-import time
-import random
-import md5
+import uuid
 
 try:
     from iccuiinstallator.config import *
 except ImportError:
     from config import *
+
+from . import log
+
+7
+__version__ = (0, 1, 1, 1)
 
 
 def get_var(sName):
@@ -127,12 +130,12 @@ def copyFile(sFileName, sNewFileName, bRewrite=True):
     try:
         # Проверка существования файла-источника
         if not os.path.isfile(sFileName):
-            print('WARNING! File %s not exist for copy' % sFileName)
+            log.warning(u'Файл <%s> не найден для копирования' % sFileName)
             return False
 
         # Проверка перезаписи уже существуещего файла
         if not bRewrite:
-            print('WARNING! File %s exist and not rewrite' % sFileName)
+            log.warning(u'Файл <%s> существуте и не перезаписываемый' % sFileName)
             return False
 
         # Создать результирующую папку
@@ -142,7 +145,7 @@ def copyFile(sFileName, sNewFileName, bRewrite=True):
         shutil.copyfile(sFileName, sNewFileName)
         return True
     except IOError:
-        print('ERROR! Copy file %s I/O error' % sFileName)
+        log.fatal(u'Ошибка копирования файла <%s>' % sFileName)
         return False
 
 
@@ -179,7 +182,7 @@ def changeExt(sFileName, sNewExt):
             os.rename(sFileName, new_name)
             return new_name
     except:
-        print('ERROR! Cange ext file %s' % sFileName)
+        log.error(u'Ошибка смены расширения файла <%s>' % sFileName)
         raise
     return None
 
@@ -216,13 +219,7 @@ def genUUID(*args):
     Генерация нового UUID.
     Вид: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
     """
-    t = long(time.time() * 1000)
-    r = long(random.random()*100000000000000000L)
-    a = random.random()*100000000000000000L
-    data = str(t)+' '+str(r)+' '+str(a)+' '+str(args)
-    data = md5.md5(data).hexdigest()
-    data = data[:8]+'-'+data[8:12]+'-'+data[12:16]+'-'+data[16:20]+'-'+data[20:]
-    return data
+    return str(uuid.uuid4())
 
 
 def getComputerName():
@@ -235,7 +232,7 @@ def getComputerName():
     comp_name = socket.gethostname()
     if isWindowsPlatform():
         # Если win то поменять кодировку c cp1251 на utf-8
-        comp_name = unicode(comp_name, 'cp1251').encode('utf-8')
+        comp_name = str(comp_name)  # 'cp1251').encode('utf-8')
     return comp_name
 
 
@@ -256,7 +253,7 @@ def getComputerNameLAT():
     # приходится заменять все на латиницу.
     if isinstance(comp_name, str):
         if isWindowsPlatform():
-            comp_name = unicode(comp_name, 'cp1251')
+            comp_name = str(comp_name)  # 'cp1251')
             comp_name = rus2lat(comp_name)
     return comp_name
 
@@ -267,9 +264,9 @@ def _rus2lat(sText, dTranslateDict):
     @param sText: Русский текст.
     @param dTranslateDict: Словарь замен.
     """
-    if not isinstance(sText, unicode):
+    if not isinstance(sText, str):
         # Привести к юникоду
-        sText = unicode(sText, 'utf-8')
+        sText = str(sText)  # 'utf-8')
         
     txt_list = list(sText)
     txt_list = [dTranslateDict.setdefault(ch, ch) for ch in txt_list]
@@ -323,12 +320,12 @@ def clear_log(sLogFileName=None, dtCurDate=None, iActualDays=None, sDateFmt='%Y-
     
     f = None
     try:
-        f = open(sLogFileName, 'r')
+        f = open(sLogFileName, 'rt')
         lines = f.readlines()
         f.close()
         f = None
         
-        f = open(sLogFileName, 'w')
+        f = open(sLogFileName, 'wt')
         for line in lines:
             date_str = line.split(' ')[0]
             if date_str > actual_date_str:
