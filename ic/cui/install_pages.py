@@ -5,10 +5,10 @@
 Инсталляционные страницы визарда.
 """
 
-import cui_dialog
-import urwid_dialog
-import pydlg_dialog
-import wizard_page
+from . import cui_dialog
+from . import urwid_dialog
+from . import pydlg_dialog
+from . import wizard_page
 
 try:
     from iccuiinstallator.ic.utils import util
@@ -22,7 +22,7 @@ except ImportError:
     from ic.utils import utils
 
 
-__version__ = (0, 0, 1, 2)
+__version__ = (0, 1, 1, 1)
 
 
 class icInstallCUIWizardPage(wizard_page.icCUIWizardPage):
@@ -149,7 +149,7 @@ class icPackageControlPage(icInstallCUIWizardPage):
                                         cui_dialog.DEFAULT_DLG_HEIGHT, cui_dialog.DEFAULT_DLG_WIDTH,
                                         pydlg_dialog.DEFAULT_LIST_HEIGHT, *items)
         else:
-            log.warning('Not support dialog type <%s>' % sDialogType)
+            log.warning(u'Не поддерживаемый тип диалога <%s>' % sDialogType)
         return None
 
     def getNext(self):
@@ -215,7 +215,7 @@ class icProgrammInstallPage(icInstallCUIWizardPage):
         Создать диалог.
         """
         if items is None:
-            log.warning(u'Install page. Not define items for programm install page.')
+            log.warning(u'Не определены элементы страницы устанавливаемых программ')
             return None
         if sDialogType == wizard_page.URWID_DIALOG_TYPE:
             return urwid_dialog.do_checklist(u'Выбор программ', cui_dialog.DEFAULT_DLG_HEIGHT, cui_dialog.DEFAULT_DLG_WIDTH,
@@ -224,7 +224,7 @@ class icProgrammInstallPage(icInstallCUIWizardPage):
             return pydlg_dialog.do_checklist(u'Выбор программ', cui_dialog.DEFAULT_DLG_HEIGHT, cui_dialog.DEFAULT_DLG_WIDTH,
                                              cui_dialog.DEFAULT_DLG_HEIGHT, *items)
         else:
-            log.warning(u'Not support dialog type <%s>' % sDialogType)
+            log.warning(u'Не поддерживаемый тип диалога <%s>' % sDialogType)
         return None
 
     def addScenarioScript(self):
@@ -233,7 +233,7 @@ class icProgrammInstallPage(icInstallCUIWizardPage):
         """
         check_list = self.get_check_list()
         if not check_list:
-            log.warning(u'Not define install programm list')
+            log.warning(u'Не определен список инсталируемых программ')
             return
         # log.debug('Check list <%s> programms %s' % (check_list, len(self._programms)))
         for i, check in enumerate(check_list):

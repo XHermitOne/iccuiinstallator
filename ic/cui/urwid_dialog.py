@@ -5,14 +5,14 @@
 URWID. Отрисовка диалогово окна.
 """
 
-import cui_dialog
+from . import cui_dialog
 
 try:
     import urwid
 except ImportError:
-    print(u'ERROR. Import error urwid')
+    print(u'Ошибка импорта библотеки urwid')
 
-__version__ = (0, 0, 2, 2)
+__version__ = (0, 1, 1, 1)
 
 
 class icCUIUrwidDialogExitException(Exception):
@@ -92,7 +92,7 @@ class icCUIUrwidDialog(cui_dialog.icCUIDialog):
         loop = urwid.MainLoop(self.view, self.palette)
         try:
             loop.run()
-        except icCUIUrwidDialogExitException, e:
+        except icCUIUrwidDialogExitException as e:
             return self.on_exit(e.args[0])
         return None
         
@@ -232,7 +232,7 @@ class icCUIUrwidListBoxButton(urwid.Button):
 
 
 def do_list(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAULT_DLG_WIDTH,
-                 list_height=cui_dialog.DEFAULT_DLG_HEIGHT, *items):
+            list_height=cui_dialog.DEFAULT_DLG_HEIGHT, *items):
     def constr(tag, state):
         return icCUIUrwidListBoxButton(tag, state=state)
     d = icCUIUrwidListDialog(text, height, width, constr, items, True)
@@ -356,6 +356,7 @@ def test_list():
     dlg = do_list(u'Check list пример', 30, 50, 1, u'Текст1', u'Text1', 3, u'Text2', u'Текст2', 5)
     result = dlg.main()
     print('Dialog return', result)
+
 
 if __name__ == '__main__':
     # test()

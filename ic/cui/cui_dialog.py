@@ -5,6 +5,8 @@
 Отрисовка диалогово окна.
 """
 
+__version__ = (0, 1, 1, 1)
+
 DEFAULT_DLG_HEIGHT = 30
 DEFAULT_DLG_WIDTH = 100
 

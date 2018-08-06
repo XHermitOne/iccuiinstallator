@@ -12,7 +12,9 @@ try:
     from iccuiinstallator.ic.utils import util
     from iccuiinstallator.ic.utils import log
 except ImportError:
-    print('Import error')
+    print(u'Ошибка импорта')
+
+__version__ = (0, 1, 1, 1)
 
 
 def _set_public_chmod(sPath):
@@ -22,7 +24,7 @@ def _set_public_chmod(sPath):
         util.set_public_chmode_tree(sPath)
     except:
         cmd = 'chmod -R 777 %s' % sPath
-        print('Do command: <%s>' % cmd)
+        log.info(u'Выполнение комманды ОС <%s>' % cmd)
         os.system(cmd)
 
 
@@ -33,7 +35,7 @@ def _targz_extract(sTarFilename, sPath):
         util.targz_extract_to_dir(sTarFilename, sPath)
     except:
         cmd = 'tar --extract --verbose --gzip --directory=%s --file=%s' % (sPath, sTarFilename)
-        print('Do command: <%s>' % cmd)
+        log.warning(u'Выполнение комманды ОС <%s>' % cmd)
         os.system(cmd)
 
 
@@ -63,31 +65,31 @@ def install_pythondialog():
     if not cur_dir:
         cur_dir = os.getcwd()
 
-    tar_filename = os.path.normpath(cur_dir+'/python2-pythondialog-3.3.0.tar.gz')
-    _log_info('''Start install PYTHONDIALOG package.
-              Current directory <%s>.
-              Tar filename <%s>''' % (cur_dir, tar_filename))
+    tar_filename = os.path.normpath(os.path.join(cur_dir, 'python2-pythondialog-3.3.0.tar.gz'))
+    _log_info(u'Начало инсталляции пакета PYTHONDIALOG')
+    _log_info(u'\tТекущая директория <%s>' % cur_dir)
+    _log_info(u'\tИмя файла <%s>''' % tar_filename)
 
     if os.path.exists(tar_filename):
         _set_public_chmod(cur_dir)
         _targz_extract(tar_filename, cur_dir)
 
-        setup_dir = os.path.normpath(cur_dir+'/python2-pythondialog-3.3.0')
-        setup_filename = os.path.normpath(setup_dir+'/setup.py')
+        setup_dir = os.path.normpath(os.path.join(cur_dir, 'python2-pythondialog-3.3.0'))
+        setup_filename = os.path.normpath(os.path.join(setup_dir, 'setup.py'))
         if os.path.exists(setup_filename):
             cmd = 'cd %s; sudo python setup.py install' % setup_dir
-            _log_info('Install pythondialog library. Command <%s>' % cmd)
+            _log_info(u'Инсталяция библиотеки pythondialog. Комманда ОС <%s>' % cmd)
             os.system(cmd)
 
             # Удалить после инсталляции распакованный архив
             if os.path.exists(setup_dir):
                 cmd = 'sudo rm -R %s' % setup_dir
-                _log_info('Delete setup directory <%s>. Command <%s>' % (setup_dir, cmd))
+                _log_info(u'Удаление директории <%s>. Комманда <%s>' % (setup_dir, cmd))
                 os.system(cmd)
         else:
-            _log_warning('Don\'t exist setup.py file <%s>' % setup_filename)
+            _log_warning(u'Не найден setup.py файл <%s>' % setup_filename)
     else:
-        _log_warning('Don\'t exist tar.gz file <%s>' % tar_filename)
+        _log_warning(u'Не существует tar.gz файл <%s>' % tar_filename)
 
 
 if __name__ == '__main__':

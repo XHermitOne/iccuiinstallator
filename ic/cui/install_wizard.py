@@ -8,8 +8,8 @@
 import os
 import os.path
 
-import wizard
-import uninstall_manager
+from . import wizard
+from . import uninstall_manager
 
 try:
     from iccuiinstallator import config
@@ -26,7 +26,7 @@ except ImportError:
     from ic.utils import utils
     from ic.utils import ini
 
-__version__ = (0, 0, 2, 3)
+__version__ = (0, 1, 1, 1)
 
 
 class icInstallCUIWizard(wizard.icCUIWizard):
@@ -119,7 +119,7 @@ class icInstallCUIWizard(wizard.icCUIWizard):
             self.settings_path = os.path.join(home_path, config.DEFAULT_WIZ_INI_DIR)
             if not os.path.exists(self.settings_path):
                 try:
-                    log.info('Create <%s> path' % self.settings_path)
+                    log.info(u'Создание директории <%s>' % self.settings_path)
                     os.makedirs(self.settings_path)
                 except:
                     log.fatal(u'Ошибка саздания папки <%s>' % self.settings_path)
@@ -140,7 +140,7 @@ class icInstallCUIWizard(wizard.icCUIWizard):
         @param Page: Объект страницы.
         """
         if self.settings and Page.__class__.__name__ in self.settings and hasattr(Page, 'init'):
-            log.info('Init page <%s> - <%s>' % (Page.__class__.__name__, self.settings[Page.__class__.__name__]))
+            log.info(u'Инициализация страницы <%s> - <%s>' % (Page.__class__.__name__, self.settings[Page.__class__.__name__]))
             return Page.init(**self.settings[Page.__class__.__name__])
         return None
 
@@ -166,7 +166,7 @@ def install(fInstallScript=None, fPrevInstallScript=None, fPostInstallScript=Non
     # Визард всегда запускается с первой страницы
     if script_ok:
         wiz_result_code = wiz.runFirstPage()
-        log.debug('Install. Wizard result code <%s>' % wiz_result_code)
+        log.debug(u'Инсталяция. Код результата <%s>' % wiz_result_code)
 
     if fPostInstallScript:
         fPostInstallScript(wiz, *args, **kwargs)
@@ -182,7 +182,7 @@ def uninstall(fUninstallScript=None, fPrevUninstallScript=None, fPostUninstallSc
     @param Programms_; Описание инсталлируемы/Деинсталлируемых программ.
     В качестве аргумента функция должна принимать объект визарда.
     """
-    import uninstall_pages
+    from . import uninstall_pages
     
     wiz = icInstallCUIWizard(u'Деинсталляция программного обеспечения')
     
@@ -200,7 +200,7 @@ def uninstall(fUninstallScript=None, fPrevUninstallScript=None, fPostUninstallSc
     # Визард всегда запускается с первой страницы
     if script_ok:
         wiz_result_code = wiz.runFirstPage()
-        log.debug('Uninstall. Wizard result code <%d>' % wiz_result_code)
+        log.debug(u'Деинсталяция. Код результата <%d>' % wiz_result_code)
 
     if fPostUninstallScript:
         fPostUninstallScript(wizard, *args, **kwargs)

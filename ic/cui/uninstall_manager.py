@@ -17,7 +17,7 @@ except ImportError:
     from ic.utils import log
     from ic.utils import util
 
-__version__ = (0, 0, 2, 2)
+__version__ = (0, 1, 1, 1)
 
 INSTALLATOR_SETTINGS_DIR = '.iccuiinstallator'
 INSTALL_LOG_FILE_NAME = 'install.log'
@@ -49,7 +49,7 @@ class icInstallLogManagerPrototype:
         install_log_file = None
         try:
             if not os.path.exists(self.get_install_log_file_name()):
-                log.warning('File <%s> not found!' % self.get_install_log_file_name())
+                log.warning(u'Файл <%s> не найден' % self.get_install_log_file_name())
                 return False
             
             install_log_file = open(self.get_install_log_file_name(), 'rt')
@@ -80,7 +80,7 @@ class icInstallLogManagerPrototype:
                 install_log_file = open(sInstallLogFileName, 'wt')
                 install_log_file.close()
                 install_log_file = None
-                log.info('File <%s> create!' % sInstallLogFileName)
+                log.info(u'Создан файл <%s>' % sInstallLogFileName)
                 return True
             return False
         except:
@@ -120,7 +120,7 @@ class icInstallLogManagerPrototype:
         install_log_file = None
         try:
             if not os.path.exists(self.get_install_log_file_name()):
-                log.warning('File <%s> not found!' % self.get_install_log_file_name())
+                log.warning(u'Файл <%s> не найден' % self.get_install_log_file_name())
                 return None
             
             install_log_file = open(self.get_install_log_file_name(), 'rt')
@@ -145,7 +145,7 @@ class icInstallLogManagerPrototype:
         install_log_file = None
         try:
             if not os.path.exists(self.get_install_log_file_name()):
-                log.warning('File <%s> not found!' % self.get_install_log_file_name())
+                log.warning(u'Файл <%s> не найден' % self.get_install_log_file_name())
                 return False
             
             install_log_file = open(self.get_install_log_file_name(), 'rt')
@@ -193,7 +193,7 @@ class icInstallLogManagerPrototype:
         Сгенерировать полное имя файла install.log.
         """
         home_dir = util.get_home_path(util.get_login())
-        return home_dir+'/'+INSTALLATOR_SETTINGS_DIR+'/'+INSTALL_LOG_FILE_NAME
+        return os.path.join(home_dir, INSTALLATOR_SETTINGS_DIR, INSTALL_LOG_FILE_NAME)
     
     def load_packages(self):
         """
@@ -284,11 +284,11 @@ class icUninstallLogManager(icInstallLogManagerPrototype):
         if self._install_log_file_name:
             # Файл лога деинсталляции располагается там же где и инсталляционный
             # файл лога
-            return os.path.dirname(self.get_install_log_file_name())+'/'+UNINSTALL_LOG_FILE_NAME
+            return os.path.join(os.path.dirname(self.get_install_log_file_name()), UNINSTALL_LOG_FILE_NAME)
         else:
             # Стандартный файл по умолчанию
             home_dir = util.get_home_path(util.get_login())
-            return home_dir+'/'+INSTALLATOR_SETTINGS_DIR+'/'+UNINSTALL_LOG_FILE_NAME
+            return os.path.join(home_dir, INSTALLATOR_SETTINGS_DIR, UNINSTALL_LOG_FILE_NAME)
     
     def get_uninstall_log_file_name(self):
         """
@@ -356,7 +356,7 @@ class icUninstallLogManager(icInstallLogManagerPrototype):
                 return True
             return False
         except:
-            log.error('Delete path: <%s>' % sPackagePath)
+            log.error(u'Ошибка удаления директории <%s>' % sPackagePath)
             raise
             
     def _is_deb_package(self, sPackageName):

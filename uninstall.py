@@ -12,6 +12,8 @@ except ImportError:
     from ic.utils import utils
     from ic.utils import log
 
+__version__ = (0, 1, 1, 1)
+
 
 def uninstall(*argv):
     """
@@ -37,17 +39,18 @@ def uninstall(*argv):
     try:
         options, args = getopt.getopt(argv, 'DL',
                                       ['debug', 'log', 'dialog', 'urwid'])
-    except getopt.error, msg:
-        log.error('ERROR: %s' % msg)
+    except getopt.error as msg:
+        log.error(u'Ошибка параметров коммандной строки %s' % err.msg, bForcePrint=True)
+        log.warning(__doc__, bForcePrint=True)
         sys.exit(2)
 
     for option, arg in options:
         if option in ('--debug', '-D'):
             utils.set_var('SERVICES_DEBUG_MODE', True)
-            log.info('Install. Set DEBUG mode')
+            log.info(u'Деинсталяция. Установка режима отладки')
         elif option in ('--log', '-L'):
             utils.set_var('SERVICES_LOG_MODE', True)
-            log.info('Install. Set LOG mode')
+            log.info('Деинсталяция. Установка режима журналирования')
         elif option in ('--dialog', ):
             utils.set_var('DIALOG_MODE', 'python-dialog')
         elif option in ('--urwid', ):

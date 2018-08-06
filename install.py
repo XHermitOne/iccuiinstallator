@@ -14,7 +14,7 @@ except ImportError:
     from ic.utils import utils
     from ic.utils import util
 
-__version__ = (0, 0, 2, 2)
+__version__ = (0, 1, 1, 1)
 
 
 def install_script(wizard):
@@ -80,36 +80,37 @@ def main(*argv):
                                        'dosemu_dir=', 'icservices_dir=',
                                        'check=', 'uncheck='])
     except getopt.error as err:
-        log.error('ERROR: %s' % err.msg, bForcePrint=True)
+        log.error(u'Ошибка параметров коммандной строки %s' % err.msg, bForcePrint=True)
+        log.warning(__doc__, bForcePrint=True)
         sys.exit(2)
 
     for option, arg in options:
         if option in ('--debug', '-D'):
             utils.set_var('SERVICES_DEBUG_MODE', True)
-            log.info('Install. Set DEBUG mode')
+            log.info(u'Инсталяция. Установка режима отладки')
         elif option in ('--log', '-L'):
             utils.set_var('SERVICES_LOG_MODE', True)
-            log.info('Install. Set LOG mode')
+            log.info(u'Инсталяция. Установка режима журналирования')
         elif option in ('--dialog', ):
             utils.set_var('DIALOG_MODE', 'python-dialog')
         elif option in ('--urwid', ):
             utils.set_var('DIALOG_MODE', 'urwid')
         elif option in ('--dosemu_dir',):
             config.PROGRAMM[config.DRIVE_C_SECTION]['dir'] = arg
-            log.info('Set Dosemu directory <%s>' % config.PROGRAMM[config.DRIVE_C_SECTION]['dir'])
+            log.info(u'Dosemu директория <%s>' % config.PROGRAMM[config.DRIVE_C_SECTION]['dir'])
         elif option in ('--icservices_dir',):
             config.PROGRAMM[config.ICSERVICES_SECTION]['dir'] = arg
-            log.info('Set icservices directory <%s>' % config.PROGRAMM[config.ICSERVICES_SECTION]['dir'])
+            log.info(u'icservices директория <%s>' % config.PROGRAMM[config.ICSERVICES_SECTION]['dir'])
             config.PROGRAMM[config.ICDAEMON_SECTION]['dir'] = arg
-            log.info('Set icdaemon directory <%s>' % config.PROGRAMM[config.ICDAEMON_SECTION]['dir'])
+            log.info(u'icdaemon директория <%s>' % config.PROGRAMM[config.ICDAEMON_SECTION]['dir'])
         elif option in ('--check',):
             i_section = int(arg)
             config.PROGRAMM[i_section]['check'] = True
-            log.info('Check section <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
+            log.info(u'[v] Вкл. секции <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
         elif option in ('--uncheck',):
             i_section = int(arg)
             config.PROGRAMM[i_section]['check'] = False
-            log.info('Uncheck section <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
+            log.info(u'[ ] Выкл. секции <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
 
     result = install_wizard.install(install_script, None, None)
 

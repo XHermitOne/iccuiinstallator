@@ -5,19 +5,19 @@
 Python dialog. Отрисовка диалогово окна.
 """
 
-import cui_dialog
+from . import cui_dialog
 
 try:
     import dialog
 except ImportError:
-    print(u'ERROR. Import error python-dialog')
+    print(u'Ошибка импорта библиотеки python-dialog')
 
 try:
     from iccuiinstallator import config
 except ImportError:
     import config
 
-__version__ = (0, 0, 2, 4)
+__version__ = (0, 1, 1, 1)
 
 
 DEFAULT_BACKGROUND_DIALOG_TITLE = config.DEFAULT_TITLE
@@ -222,6 +222,7 @@ def test_list():
     result = dlg.main()
     return 'List <%s>' % result
 
+
 if __name__ == '__main__':
     results = list()
     results.append(test_yesno())
@@ -233,4 +234,4 @@ if __name__ == '__main__':
     results.append(test_list())
 
     for result in results:
-        print('Dialog return', result)
+        print(u'Результат', result)

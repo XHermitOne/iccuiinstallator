@@ -7,12 +7,12 @@
 
 try:
     import urwid
-    import cui_dialog
-    import urwid_dialog
+    from . import cui_dialog
+    from . import urwid_dialog
 except ImportError:
-    print(u'ERROR. Import error urwid')
+    print(u'Ошибка импорта библиотеки urwid')
 
-__version__ = (0, 0, 2, 2)
+__version__ = (0, 1, 1, 1)
 
 DEFAULT_MSG_HEIGHT = 10
 

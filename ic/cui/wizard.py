@@ -12,7 +12,7 @@ except ImportError:
     import config
     from ic.utils import log
 
-__version__ = (0, 0, 1, 2)
+__version__ = (0, 1, 1, 1)
 
 NEXT_PAGE_CODE = 1
 PREV_PAGE_CODE = -1
@@ -82,7 +82,7 @@ class icCUIWizard:
             first_page = self.pages[0]
             if first_page:
                 code = self.runWizard(first_page)
-                log.debug('Run wizard code return <%s>' % code)
+                log.debug(u'Результирующий код <%s>' % code)
                 if code == FINISH_PAGE_CODE or code is True:
                     # Нажата кнопка <OK>
                     # Сохранить настройки
@@ -103,7 +103,7 @@ class icCUIWizard:
             code = Page.main()
             while code in (PREV_PAGE_CODE, NEXT_PAGE_CODE, True):
 
-                log.debug('Page %s. Return code <%s>' % (Page.__class__.__name__, code))
+                log.debug(u'Страница %s. Результирующий код <%s>' % (Page.__class__.__name__, code))
 
                 if code == PREV_PAGE_CODE:
                     Page.delScenarioScript()
@@ -155,10 +155,10 @@ class icCUIWizard:
                     enable = step[4]
                     if func and enable:
                         try:
-                            log.info('Do scenario %s args: %s kwargs: %s' % (func.__name__, args, kwargs))
+                            log.info(u'Выполнение сценария %s args: %s kwargs: %s' % (func.__name__, args, kwargs))
                             step_result = func(*args, **kwargs)
                         except:
-                            log.fatal('Scenario error exec function %s' % func)
+                            log.fatal(u'Ошибка выполнения функции сценария <%s>' % func)
                             step_result = False
                             if config.DEBUG_MODE:
                                 raise
@@ -175,7 +175,6 @@ class icCUIWizard:
 
 
 def test():
-    
     wiz = icCUIWizard()
     wiz.main()
 

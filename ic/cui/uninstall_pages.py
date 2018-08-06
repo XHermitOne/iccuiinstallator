@@ -5,10 +5,10 @@
 Деинсталляционные страницы визарда.
 """
 
-import cui_dialog
-import urwid_dialog
-import pydlg_dialog
-import wizard_page
+from . import cui_dialog
+from . import urwid_dialog
+from . import pydlg_dialog
+from . import wizard_page
 
 try:
     from iccuiinstallator.ic.utils import util
@@ -21,7 +21,7 @@ except ImportError:
     from ic.utils import tools
     from ic.utils import utils
 
-__version__ = (0, 0, 1, 2)
+__version__ = (0, 1, 1, 1)
 
 
 class icUninstallCliWizardPage(wizard_page.icCUIWizardPage):
@@ -71,7 +71,7 @@ class icProgrammUninstallPage(icUninstallCliWizardPage):
                         programm.get('description', programm['programm']), 'on']
                 programm_list += line
 
-        log.debug('Programm list <%s>' % programm_list)
+        log.debug(u'Список программ <%s>' % programm_list)
         self.dlg = self.create_dialog(sDialogType=utils.get_var('DIALOG_MODE'), items=programm_list)
 
     def create_dialog(self, sDialogType=wizard_page.URWID_DIALOG_TYPE, items=None):
@@ -88,7 +88,7 @@ class icProgrammUninstallPage(icUninstallCliWizardPage):
             return pydlg_dialog.do_checklist(u'Выбор программ', cui_dialog.DEFAULT_DLG_HEIGHT, cui_dialog.DEFAULT_DLG_WIDTH,
                                              cui_dialog.DEFAULT_DLG_HEIGHT, *items)
         else:
-            log.warning('Not support dialog type <%s>' % sDialogType)
+            log.warning(u'Не поддерживаемы тип диалога <%s>' % sDialogType)
         return None
 
     def addScenarioScript(self):

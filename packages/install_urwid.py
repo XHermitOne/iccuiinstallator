@@ -12,7 +12,7 @@ try:
     from iccuiinstallator.ic.utils import util
     from iccuiinstallator.ic.utils import log
 except ImportError:
-    print('Import error')
+    print(u'Ошибка импорта')
 
 
 def _set_public_chmod(sPath):
@@ -22,7 +22,7 @@ def _set_public_chmod(sPath):
         util.set_public_chmode_tree(sPath)
     except:
         cmd = 'chmod -R 777 %s' % sPath
-        print('Do command: <%s>' % cmd)
+        print(u'Выполнение комманды ОС <%s>' % cmd)
         os.system(cmd)
 
 
@@ -33,7 +33,7 @@ def _targz_extract(sTarFilename, sPath):
         util.targz_extract_to_dir(sTarFilename, sPath)
     except:
         cmd = 'tar --extract --verbose --gzip --directory=%s --file=%s' % (sPath, sTarFilename)
-        print('Do command: <%s>' % cmd)
+        print(u'Выполнение комманды ОС <%s>' % cmd)
         os.system(cmd)
 
 
@@ -63,30 +63,30 @@ def install_urwid():
     cur_dir = os.path.dirname(__file__)
     if not cur_dir:
         cur_dir = os.getcwd()
-    tar_filename = os.path.normpath(cur_dir+'/urwid-1.2.1.tar.gz')
-    _log_info('''Start install URWID package.
-              Current directory <%s>. 
-              Tar filename <%s>''' % (cur_dir, tar_filename))
+    tar_filename = os.path.normpath(os.path.join(cur_dir, 'urwid-1.2.1.tar.gz'))
+    _log_info(u'Начало инсталляции пакета URWID')
+    _log_info(u'\tТекущая директория <%s>' % cur_dir)
+    _log_info(u'\tИмя файла <%s>''' % tar_filename)
 
     if os.path.exists(tar_filename):
         _set_public_chmod(cur_dir)
         _targz_extract(tar_filename, cur_dir)
 
-        setup_dir = os.path.normpath(cur_dir+'/urwid-1.2.1')
-        setup_filename = os.path.normpath(setup_dir+'/setup.py')
+        setup_dir = os.path.normpath(os.path.join(cur_dir, 'urwid-1.2.1'))
+        setup_filename = os.path.normpath(os.path.join(setup_dir, 'setup.py'))
         if os.path.exists(setup_filename):
             cmd = 'cd %s; sudo python setup.py install' % setup_dir
-            _log_info('Install urwid library. Command <%s>' % cmd)
+            _log_info(u'Инсталляция библиотеки urwid. Команда ОС <%s>' % cmd)
             os.system(cmd)
             # Удалить после инсталляции распакованный архив
             if os.path.exists(setup_dir):
                 cmd = 'sudo rm -R %s' % setup_dir
-                _log_info('Delete setup directory <%s>. Command <%s>' % (setup_dir, cmd))
+                _log_info(u'Удаление директории <%s>. Комманда <%s>' % (setup_dir, cmd))
                 os.system(cmd)
         else:
-            _log_warning('Don\'t exist setup.py file <%s>' % setup_filename)
+            _log_warning(u'Не найден setup.py файл <%s>' % setup_filename)
     else:
-        _log_warning('Don\'t exist tar.gz file <%s>' % tar_filename)
+        _log_warning(u'Не существует tar.gz файл <%s>' % tar_filename)
 
 
 if __name__ == '__main__':

@@ -5,9 +5,9 @@
 Страница визарда.
 """
 
-import cui_dialog
+from . import cui_dialog
 
-import urwid_dialog
+from . import urwid_dialog
 
 try:
     from iccuiinstallator.ic.utils import log
@@ -16,7 +16,7 @@ except ImportError:
     from ic.utils import log
     from ic.utils import utils
 
-__version__ = (0, 0, 1, 2)
+__version__ = (0, 1, 1, 1)
 
 URWID_DIALOG_TYPE = 'urwid'
 PYDLG_DIALOG_TYPE = 'python-dialog'
@@ -83,14 +83,14 @@ class icCUIWizardPage:
         if self.dlg:
             return self.dlg.add_buttons(lButtons, sAlign)
         else:
-            log.warning('Wizard page. Not define dialog')
+            log.warning(u'Страница. Не определен диалог')
         return None
 
     def button_press(self, button):
         if self.dlg:
             return self.dlg.button_press(button)
         else:
-            log.warning('Wizard page. Not define dialog')
+            log.warning(u'Страница. Не определен диалог')
         return None
 
     def main(self):
@@ -102,7 +102,7 @@ class icCUIWizardPage:
             else:
                 return result
         else:
-            log.warning('Wizard page. Not define dialog')
+            log.warning(u'Страница. Не определен диалог')
         return None
 
     def on_exit(self, exitcode):
@@ -114,7 +114,7 @@ class icCUIWizardPage:
             else:
                 return result
         else:
-            log.warning('Wizard page. Not define dialog')
+            log.warning(u'Страница. Не определен диалог')
         return None
 
     def get_check_list(self):
@@ -124,5 +124,5 @@ class icCUIWizardPage:
         if self.dlg:
             return self.dlg.get_check_list()
         else:
-            log.warning('Wizard page. Not define dialog')
+            log.warning(u'Страница. Не определен диалог')
         return None
