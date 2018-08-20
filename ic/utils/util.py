@@ -15,6 +15,8 @@ import stat
 import getpass
 import shutil
 import apt_pkg
+import subprocess
+import tempfile
 
 from . import log
 
@@ -129,7 +131,10 @@ def check_deb_linux_package(PackageName_, Version_=None, Compare_='=='):
     """
     cmd = 'dpkg-query --list | grep \'ii \' | grep \'%s\'' % PackageName_
     try:
-        result = os.popen3(cmd)[1].readlines()
+        process = subprocess.Popen(cmd, shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   close_fds=True)
+        result = process.stdout.readlines()
         return bool(result)
     except:
         log.error(u'Ошибка проверки Debian инсталлируемого пакета <%s>' % cmd)
@@ -153,7 +158,10 @@ def get_uname(Option_='-a'):
     """
     cmd = 'uname %s' % Option_
     try:
-        return os.popen3(cmd)[1].readline()
+        process = subprocess.Popen(cmd, shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   close_fds=True)
+        return process.stdout.readline()
     except:
         log.error(u'Ошибка выполнения комманды Uname <%s>' % cmd)
         raise
@@ -166,7 +174,7 @@ def is_64_linux():
     @return: True - 64 разрядная ОС Linux. False - нет.
     """
     uname_result = get_uname()
-    return 'x86_64' in uname_result
+    return 'x86_64' in uname_result.decode()
 
 
 def get_linux_name():
@@ -177,11 +185,19 @@ def get_linux_name():
         if os.path.exists('/etc/issue'):
             # Обычно Debian/Ubuntu Linux
             cmd = 'cat /etc/issue'
-            return os.popen3(cmd)[1].readline().replace('\\n', '').replace('\\l', '').strip()
+            process = subprocess.Popen(cmd, shell=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       close_fds=True)
+            txt = process.stdout.readline().decode()
+            return txt.replace('\\n', '').replace('\\l', '').strip()
         elif os.path.exists('/etc/release'):
             # Обычно RedHat Linux
             cmd = 'cat /etc/release'
-            return os.popen3(cmd)[1].readline().replace('\\n', '').replace('\\l', '').strip()
+            process = subprocess.Popen(cmd, shell=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       close_fds=True)
+            txt = process.stdout.readline().decode()
+            return txt.replace('\\n', '').replace('\\l', '').strip()
     except:
         log.error(u'Ошибка определения названия ОС Linux')
         raise
@@ -329,9 +345,13 @@ def unzip_to_dir(ZipFileName_, Dir_, bOverwrite=True, bConsole=True):
             os.system(unzip_cmd)
             return None
         else:
-            return os.popen3(unzip_cmd)
+            process = subprocess.Popen(unzip_cmd, shell=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       close_fds=True)
+            # txt = process.stdout.readline().decode()
+            return True
     except:
-        log.error('Unzip. Ошибка разархивирования <%s>' % unzip_cmd)
+        log.error(u'Unzip. Ошибка разархивирования <%s>' % unzip_cmd)
         raise
     return None
 
@@ -365,7 +385,11 @@ def targz_extract_to_dir(TarFileName_, Dir_, bConsole=True):
             # Программа не дожидается выполнения разархивирования
             # и работает дальше. В случае с <os.system> программа
             # дожидается процесса разархивирования
-            return os.popen3(targz_extract_cmd)
+            process = subprocess.Popen(targz_extract_cmd, shell=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                       close_fds=True)
+            # txt = process.stdout.readline().decode()
+            return True
     except:
         log.fatal(u'TarGz. Ошибка разархивирования <%s>' % targz_extract_cmd)
         # raise
@@ -649,7 +673,7 @@ def set_public_chmod_tree_cmd(sPath):
     path = normpath(sPath, get_login())
     if os.path.exists(path):
         try:
-            # if isinstance(path, unicode):
+            # if isinstance(path, str):
             #    path = path.encode(sys.getfilesystemencoding())
             cmd = 'sudo chmod --recursive 777 "%s"' % path
             log.info(u'Запуск комманды ОС <%s>' % cmd)   # sys.getfilesystemencoding()))
@@ -720,7 +744,7 @@ def normpath(path, sUserName=None):
     @param sUserName: Имя пользователя.
     """
     home_dir = get_home_path(sUserName)
-    return os.path.abspath(os.path.normpath(path.replace('~', home_dir)))
+    return os.path.normpath(os.path.abspath(path.replace('~', home_dir)))
 
 
 def text_file_append(sTextFileName, sText, CR='\n'):
@@ -1160,6 +1184,7 @@ def targz_extract_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFA
         os.makedirs(install_dir)
 
     tar_file_name = normpath(os.path.join('.', sPackageDir, dProgramm['programm']))
+    log.info(u'Полное имя файла TaGz <%s> программы для разархивирования' % tar_file_name)
 
     console = dProgramm.get('console', True)
     return targz_extract_to_dir(tar_file_name, install_dir, bConsole=console)
@@ -1283,7 +1308,8 @@ def get_temp_dir():
     """
     Определение временной директории.
     """
-    return os.path.dirname(os.tempnam())
+    # return os.path.dirname(os.tempnam())
+    return tempfile.gettempdir()
 
 
 def check_section(prg_list, section, check=True):

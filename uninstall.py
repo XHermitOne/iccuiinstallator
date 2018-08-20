@@ -5,10 +5,10 @@ import copy
 import getopt
 
 try:
-    from iccuiinstallator import config
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.utils import utils
-    from iccuiinstallator.ic.utils import util
+    import config
+    from .ic.utils import log
+    from .ic.utils import utils
+    from .ic.utils import util
 except ImportError:
     import config
     from ic.utils import log
@@ -38,7 +38,7 @@ def uninstall(*argv):
     log.info(config.TITLE_TXT)
 
     try:
-        from iccuiinstallator.ic.cui import install_wizard
+        from .ic.cui import install_wizard
     except ImportError:
         from ic.cui import install_wizard
 

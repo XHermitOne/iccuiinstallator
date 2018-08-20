@@ -141,7 +141,7 @@ class icCUIPyDlgListDialog(icCUIPyDlgDialog):
 
 def do_list(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAULT_DLG_WIDTH,
             list_height=DEFAULT_LIST_HEIGHT, *items):
-    elements = [(items[i*3], i+1, 1, items[i*3+1], i+1, 20, 0, 0, LIST_ELEMENT_READ_ONLY) for i in range(len(items)/3)]
+    elements = [(items[i*3], i+1, 1, items[i*3+1], i+1, 20, 0, 0, LIST_ELEMENT_READ_ONLY) for i in range(int(len(items)/3))]
     return icCUIPyDlgListDialog(title=text, width=width, height=height,
                                 list_height=list_height, body=elements)
 
@@ -149,9 +149,9 @@ def do_list(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAULT
 def do_checklist(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAULT_DLG_WIDTH,
                  list_height=DEFAULT_LIST_HEIGHT, *items):
     # choices = [(items[i*3], items[i*3+1],
-    #             'on' if items[i*3+2] else 'off') for i in range(len(items)/3)]
+    #             'on' if items[i*3+2] else 'off') for i in range(int(len(items)/3))]
     choices = [(items[i*3], items[i*3+1],
-                items[i*3+2]) for i in range(len(items)/3)]
+                items[i*3+2]) for i in range(int(len(items)/3))]
     return icCUIPyDlgCheckListDialog(title=text, width=width, height=height,
                                      list_height=list_height, body=choices)
 
@@ -166,7 +166,7 @@ def do_msgbox(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAU
 
 def do_radiolist(text, height=cui_dialog.DEFAULT_DLG_HEIGHT, width=cui_dialog.DEFAULT_DLG_WIDTH,
                  list_height=DEFAULT_LIST_HEIGHT, *items):
-    choices = [(items[i*3], items[i*3+1], 'on' if items[i*3+2] else 'off') for i in range(len(items)/3)]
+    choices = [(items[i*3], items[i*3+1], 'on' if items[i*3+2] else 'off') for i in range(int(len(items)/3))]
     return icCUIPyDlgRadioListDialog(title=text, width=width, height=height,
                                      list_height=list_height, body=choices)
 

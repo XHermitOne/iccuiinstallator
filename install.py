@@ -4,10 +4,10 @@
 import getopt
 
 try:
-    from iccuiinstallator import config
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.utils import utils
-    from iccuiinstallator.ic.utils import util
+    import config
+    from .ic.utils import log
+    from .ic.utils import utils
+    from .ic.utils import util
 except ImportError:
     import config
     from ic.utils import log
@@ -62,15 +62,15 @@ def main(*argv):
 
     # Проверка устанувки библиотеки pythondialog
     if not util.check_python_library_version('dialog'):
-        import packages
+        from . import packages
         packages.install_pythondialog()
     # Проверка на устанвки библиотеки urwid
     if not util.check_python_library_version('urwid'):
-        import packages
+        from . import packages
         packages.install_urwid()
 
     try:
-        from iccuiinstallator.ic.cui import install_wizard
+        from .ic.cui import install_wizard
     except ImportError:
         from ic.cui import install_wizard
 

@@ -6,6 +6,3 @@
 """
 
 __version__ = (0, 1, 1, 1)
-
-# from ic.cui.wizard import *
-# from ic.util import *
