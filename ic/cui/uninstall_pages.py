@@ -68,10 +68,11 @@ class icProgrammUninstallPage(icUninstallCliWizardPage):
         if self._programms:
             for programm in self._programms:
                 line = [programm.get('name', programm['programm']),
-                        programm.get('description', programm['programm']), 'on']
+                        programm.get('description', programm['programm']),
+                        'on' if programm.get('check', True) else 'off']
                 programm_list += line
 
-        log.debug(u'Список программ <%s>' % programm_list)
+        # log.debug(u'Список программ <%s>' % programm_list)
         self.dlg = self.create_dialog(sDialogType=utils.get_var('DIALOG_MODE'), items=programm_list)
 
     def create_dialog(self, sDialogType=wizard_page.URWID_DIALOG_TYPE, items=None):
@@ -121,7 +122,8 @@ def add_wizard_programm_uninstall_page(Wizard, lProgramms, *args, **kwargs):
         programms = [{'programm': package_name,
                       'dir': package_dir,
                       'description': dProgramms.get(package_name, {}).get('description', ''),
-                      'script': dProgramms.get(package_name, {}).get('script', None)} for package_name, package_dir in packages.items()]
-    page = icProgrammUninstallPage(Wizard, u'Программы', programms, *args,**kwargs)
+                      'script': dProgramms.get(package_name, {}).get('script', None),
+                      'check': dProgramms.get(package_name, {}).get('check', True)} for package_name, package_dir in packages.items()]
+    page = icProgrammUninstallPage(Wizard, u'Программы', programms, *args, **kwargs)
     Wizard.appendPage(page)
     return page    

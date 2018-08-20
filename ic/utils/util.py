@@ -1286,6 +1286,36 @@ def get_temp_dir():
     return os.path.dirname(os.tempnam())
 
 
+def check_section(prg_list, section, check=True):
+    """
+    Установка отметки секции для инсталляции.
+    @param prg_list: Список секций.
+    @param section: Указание секции.
+        Секция может задаваться как индекс в списке описаний, так и по имени секции
+    @param check: True - Ставить отметку. False - убрать отметку.
+    @return: Измененный список секций.
+    """
+    i_section = None
+    if isinstance(section, int):
+        # Секция задается индексом
+        i_section = section
+    else:
+        # Секция задается именем
+        section_names = [section_dict['name'] for section_dict in prg_list]
+        if section in section_names:
+            i_section = section_names.index(section)
+    if i_section is not None:
+        prg_list[i_section]['check'] = check
+        if check:
+            log.info(u'[v] Вкл. секции <%s>' % prg_list[i_section].get('description', prg_list[i_section]['name']))
+        else:
+            log.info(u'[ ] Выкл. секции <%s>' % prg_list[i_section].get('description', prg_list[i_section]['name']))
+    else:
+        log.warning(u'Ошибка определения секции <%s>' % str(section))
+
+    return prg_list
+
+
 def test():
     """
     Функция тестирования.

@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 #  -*- coding: utf-8 -*-
 
+import copy
 import getopt
 
 try:
     from iccuiinstallator import config
-    from iccuiinstallator.ic.utils import utils
     from iccuiinstallator.ic.utils import log
+    from iccuiinstallator.ic.utils import utils
+    from iccuiinstallator.ic.utils import util
 except ImportError:
     import config
-    from ic.utils import utils
     from ic.utils import log
+    from ic.utils import utils
+    from ic.utils import util
+
 
 __version__ = (0, 1, 1, 1)
 
@@ -26,6 +30,9 @@ def uninstall(*argv):
 
         --dialog            - включить режим диалогов pythondialogs
         --urwid             - включить режим диалогов urwid (по умолчанию)
+
+        --check=            - отметить секцию для установки
+        --uncheck=          - снять отметку секции для установки
     """
     log.init(config)
     log.info(config.TITLE_TXT)
@@ -38,11 +45,14 @@ def uninstall(*argv):
     # Разбираем аргументы командной строки
     try:
         options, args = getopt.getopt(argv, 'DL',
-                                      ['debug', 'log', 'dialog', 'urwid'])
+                                      ['debug', 'log', 'dialog', 'urwid',
+                                       'check=', 'uncheck='])
     except getopt.error as msg:
-        log.error(u'Ошибка параметров коммандной строки %s' % err.msg, bForcePrint=True)
+        log.error(u'Ошибка параметров коммандной строки %s' % str(msg), bForcePrint=True)
         log.warning(__doc__, bForcePrint=True)
         sys.exit(2)
+
+    programms = copy.deepcopy(config.UNINSTALL_PROGRAMM)
 
     for option, arg in options:
         if option in ('--debug', '-D'):
@@ -56,7 +66,15 @@ def uninstall(*argv):
         elif option in ('--urwid', ):
             utils.set_var('DIALOG_MODE', 'urwid')
 
-    result = install_wizard.uninstall(dProgramms=config.UNINSTALL_PROGRAMM)
+        elif option in ('--check',):
+            section = int(arg) if arg.isdigit() else arg
+            programms = util.check_section(programms, section, True)
+
+        elif option in ('--uncheck',):
+            section = int(arg) if arg.isdigit() else arg
+            programms = util.check_section(programms, section, False)
+
+    result = install_wizard.uninstall(dProgramms=programms)
     log.info(config.TITLE_TXT)
 
     return result

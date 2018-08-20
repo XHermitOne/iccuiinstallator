@@ -14,6 +14,7 @@ except ImportError:
     from ic.utils import utils
     from ic.utils import util
 
+
 __version__ = (0, 1, 1, 1)
 
 
@@ -104,13 +105,12 @@ def main(*argv):
             config.PROGRAMM[config.ICDAEMON_SECTION]['dir'] = arg
             log.info(u'icdaemon директория <%s>' % config.PROGRAMM[config.ICDAEMON_SECTION]['dir'])
         elif option in ('--check',):
-            i_section = int(arg)
-            config.PROGRAMM[i_section]['check'] = True
-            log.info(u'[v] Вкл. секции <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
+            section = int(arg) if arg.isdigit() else arg
+            config.PROGRAMM = util.check_section(config.PROGRAMM, section, True)
+
         elif option in ('--uncheck',):
-            i_section = int(arg)
-            config.PROGRAMM[i_section]['check'] = False
-            log.info(u'[ ] Выкл. секции <%s>' % config.PROGRAMM[i_section].get('description', config.PROGRAMM[i_section]['name']))
+            section = int(arg) if arg.isdigit() else arg
+            config.PROGRAMM = util.check_section(config.PROGRAMM, section, False)
 
     result = install_wizard.install(install_script, None, None)
 

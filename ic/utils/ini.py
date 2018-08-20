@@ -15,7 +15,10 @@ import os.path
 import shutil
 import re
 
-from ic.log import log
+try:
+    from . import log
+except ImportError:
+    from ic.log import log
 
 try:
     import configparser
