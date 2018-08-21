@@ -9,10 +9,10 @@ import os
 import os.path
 
 try:
-    from iccuiinstallator.ic.utils import util
-    from iccuiinstallator.ic.utils import log
-except ImportError:
-    print(u'Ошибка импорта')
+    from ..utils import util
+    from ..utils import log
+except Exception:
+    print(u'Ошибка импорта в модуле iinstall_urwid')
 
 
 def _set_public_chmod(sPath):

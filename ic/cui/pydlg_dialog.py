@@ -13,9 +13,9 @@ except ImportError:
     print(u'Ошибка импорта библиотеки python-dialog')
 
 try:
-    from iccuiinstallator import config
-except ImportError:
     import config
+except Exception:
+    from iccuiinstallator import config
 
 __version__ = (0, 1, 1, 1)
 

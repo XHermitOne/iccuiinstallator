@@ -10,8 +10,8 @@ from . import pydlg_message
 from . import wizard_page
 
 try:
-    from iccuiinstallator.ic.utils import log
-except ImportError:
+    from ..utils import log
+except Exception:
     from ic.utils import log
 
 __version__ = (0, 1, 1, 1)

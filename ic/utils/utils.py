@@ -14,7 +14,7 @@ import uuid
 
 try:
     from iccuiinstallator.config import *
-except ImportError:
+except Exception:
     from config import *
 
 from . import log

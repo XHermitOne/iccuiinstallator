@@ -5,11 +5,11 @@ import copy
 import getopt
 
 try:
-    import config
+    from . import config
     from .ic.utils import log
     from .ic.utils import utils
     from .ic.utils import util
-except ImportError:
+except Exception:
     import config
     from ic.utils import log
     from ic.utils import utils
@@ -39,7 +39,7 @@ def uninstall(*argv):
 
     try:
         from .ic.cui import install_wizard
-    except ImportError:
+    except Exception:
         from ic.cui import install_wizard
 
     # Разбираем аргументы командной строки

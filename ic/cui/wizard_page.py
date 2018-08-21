@@ -10,9 +10,9 @@ from . import cui_dialog
 from . import urwid_dialog
 
 try:
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.utils import utils
-except ImportError:
+    from ..utils import log
+    from ..utils import utils
+except Exception:
     from ic.utils import log
     from ic.utils import utils
 

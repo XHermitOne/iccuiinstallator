@@ -17,7 +17,7 @@ import re
 
 try:
     from . import log
-except ImportError:
+except Exception:
     from ic.log import log
 
 try:

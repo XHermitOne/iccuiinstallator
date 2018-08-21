@@ -12,13 +12,13 @@ from . import wizard
 from . import uninstall_manager
 
 try:
-    from iccuiinstallator import config
-    from iccuiinstallator.ic.utils import util
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.cui import cui_message
-    from iccuiinstallator.ic.utils import utils
-    from iccuiinstallator.ic.utils import ini
-except ImportError:
+    from .. import config
+    from ..utils import util
+    from ..utils import log
+    from . import cui_message
+    from ..utils import utils
+    from ..utils import ini
+except Exception:
     import config
     from ic.utils import util
     from ic.utils import log

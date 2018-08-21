@@ -11,9 +11,9 @@ import shutil
 import time
 
 try:
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.utils import util
-except ImportError:
+    from ..utils import log
+    from ..utils import util
+except Exception:
     from ic.utils import log
     from ic.utils import util
 

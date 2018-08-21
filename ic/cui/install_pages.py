@@ -11,11 +11,11 @@ from . import pydlg_dialog
 from . import wizard_page
 
 try:
-    from iccuiinstallator.ic.utils import util
-    from iccuiinstallator.ic.utils import log
-    from iccuiinstallator.ic.utils import tools
-    from iccuiinstallator.ic.utils import utils
-except ImportError:
+    from ..utils import util
+    from ..utils import log
+    from ..utils import tools
+    from ..utils import utils
+except Exception:
     from ic.utils import util
     from ic.utils import log
     from ic.utils import tools

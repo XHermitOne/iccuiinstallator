@@ -6,9 +6,9 @@
 """
 
 try:
-    from iccuiinstallator import config
-    from iccuiinstallator.ic.utils import log
-except ImportError:
+    from .... import config
+    from ..utils import log
+except Exception:
     import config
     from ic.utils import log
 

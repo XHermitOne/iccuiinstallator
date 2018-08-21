@@ -279,31 +279,49 @@ def is_deb_linux_uname():
     return (u'Ubuntu' in uname_result) or (u'Debian' in uname_result)
 
 
-def get_dist_packages_path():
+def get_dist_packages_path(python_stdlib_path=None):
     """
     Путь к папке 'dist-packages' или 'site_packages'
     (в зависимости от дистрибутива) Python.
+    @param python_stdlib_path: Папка стандарных библиотек Python.
     """
-    python_stdlib_path = sysconfig.get_path('stdlib')
+    if python_stdlib_path is None:
+        python_stdlib_path = sysconfig.get_path('stdlib')
     site_packages_path = os.path.normpath(os.path.join(python_stdlib_path, 'site-packages'))
     dist_packages_path = os.path.normpath(os.path.join(python_stdlib_path, 'dist-packages'))
     if os.path.exists(site_packages_path):
         return site_packages_path
     elif os.path.exists(dist_packages_path):
         return dist_packages_path
+    else:
+        log.warning(u'Не найдена папка пакетов Python. Проверка: <%s> и <%s>' % (site_packages_path,
+                                                                                 dist_packages_path))
     return None
 
 
-def create_pth_file(PthFileName_, Path_):
+def create_pth_file(PthFileName_, Path_, stdlib_path=None):
     """
     Создание *.pth файла в папке site_packages.
     @param PthFileName_: Не полное имя pth файла, например 'ic.pth'.
     @param Path_: Путь который указывается в pth файле.
+    @param stdlib_path: Папка стандартных библиотек Python.
+        Если не указвается, то  берется из окружения текущего интерпретатора Python.
     @return: Возвращает результат выполнения операции True/False.
     """
+    if not PthFileName_:
+        log.warning(u'Не определен *.pth файл при создании')
+        return False
+    if not Path_:
+        log.warning(u'Не указан путь на который ссылается *.pth файл при создании')
+        return False
+
+    dist_packages_path = get_dist_packages_path(stdlib_path)
+    if not dist_packages_path:
+        log.warning(u'Не указан путь инсталяционной директории для *.pth файла')
+        return False
+
     pth_file = None
     try:
-        dist_packages_path = get_dist_packages_path()
         pth_file_name = os.path.join(dist_packages_path, PthFileName_)
         pth_file = open(pth_file_name, 'wt')
         pth_file.write(Path_)
@@ -321,7 +339,7 @@ def create_pth_file(PthFileName_, Path_):
         if pth_file:
             pth_file.close()
             pth_file = None
-        raise
+        log.fatal(u'Ошибка сохранения файла <%s>' % PthFileName_)
     return False
 
 
@@ -547,7 +565,7 @@ def check_dir(Dir_):
     """
     Проверить папку, если ее нет то она создается.
     """
-    norm_dir = normpath(Dir_, get_login())
+    norm_dir = normpath(Dir_)
     if not os.path.exists(norm_dir):
         try:
             os.makedirs(norm_dir)
@@ -559,23 +577,27 @@ def check_dir(Dir_):
         return True
 
 
-def save_file_txt(FileName_, Txt_=''):
+def save_file_txt(FileName_, Txt_='', encoding=None):
     """
     Запись текста в файл.
     @param FileName_; Имя файла.
     @param Txt_: Записываемый текст.
+    @param encoding: Кодировка файла.
+        Если не указывается, то берется UTF-8.
     @return: True/False.
     """
+    if encoding is None:
+        encoding = 'utf-8'
     file = None
     try:
-        file = open(FileName_, 'wt')
+        file = open(FileName_, 'wt', encoding=encoding)
         file.write(Txt_)
         file.close()
         return True
     except:
         if file:
             file.close()
-        log.error(u'Ошибка сохранения текстового файла <%s>' % FileName_)
+        log.fatal(u'Ошибка сохранения текстового файла <%s>' % FileName_)
     return False
 
 
@@ -587,7 +609,7 @@ def copy_file_to(SrcFileName_, DstPath_, ReWrite_=True):
     @param ReWrite_: Перезаписать файл, если он уже существует?
     """
     try:
-        DstPath_ = normpath(DstPath_, get_login())
+        DstPath_ = normpath(DstPath_)
         if not os.path.exists(DstPath_):
             os.makedirs(DstPath_)
         dst_file_name = os.path.join(DstPath_, os.path.basename(SrcFileName_))
@@ -641,14 +663,13 @@ def set_chmod(sPath, mode=stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU):
     """
     Установить режим доступа (по умолчанию 0x777) к файлу/папке.
     """
-    path = normpath(sPath, get_login())
+    path = normpath(sPath)
     if os.path.exists(path):
         # log.info(u'Set public chmod path <%s>' % path)
         os.chmod(path, mode)
         return True
     else:
-        log.warning(u'Путь <%s> не найден' % path)
-
+        log.warning(u'CHMOD. Путь <%s> не найден' % path)
     return False
 
 
@@ -656,11 +677,11 @@ def set_public_chmode_tree(sPath):
     """
     Установить свободный режим доступа (0x777) к файлу/папке рекурсивно.
     """
-    path = normpath(sPath, get_login())
+    path = normpath(sPath)
     result = set_public_chmod(path)
     if os.path.isdir(path):
-        for f in os.listdir(path):
-            pathname = os.path.join(path, f)
+        for filename in os.listdir(path):
+            pathname = os.path.join(path, filename)
             set_public_chmode_tree(pathname)
     return result
 
@@ -670,7 +691,7 @@ def set_public_chmod_tree_cmd(sPath):
     Установить свободный режим доступа (0x777) к файлу/папке рекурсивно.
     Функция выполняется с помощью команды OS.
     """
-    path = normpath(sPath, get_login())
+    path = normpath(sPath)
     if os.path.exists(path):
         try:
             # if isinstance(path, str):
@@ -744,7 +765,8 @@ def normpath(path, sUserName=None):
     @param sUserName: Имя пользователя.
     """
     home_dir = get_home_path(sUserName)
-    return os.path.normpath(os.path.abspath(path.replace('~', home_dir)))
+    pathname = (home_dir + path[1:]) if path.startswith('~') else path
+    return os.path.normpath(pathname)
 
 
 def text_file_append(sTextFileName, sText, CR='\n'):
@@ -755,7 +777,7 @@ def text_file_append(sTextFileName, sText, CR='\n'):
     @param CR: Символ возврата каретки.
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         try:
@@ -791,7 +813,7 @@ def text_file_replace(sTextFileName, sOld, sNew, bAutoAdd=True, CR='\n'):
     @param CR: Символ возврата каретки.
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         try:
@@ -830,7 +852,7 @@ def text_file_find(sTextFileName, sFind, sFindMethod='in'):
         'endswith' - поиск подстроки в конце текущей строки
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         try:
@@ -870,7 +892,7 @@ def text_file_subreplace(sTextFileName, sSubStr, sNew, bAutoAdd=True, CR='\n', s
         'endswith' - поиск подстроки в конце текущей строки
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         try:
@@ -922,7 +944,7 @@ def text_file_subdelete(sTextFileName, sSubStr, sFindMethod='in'):
         'endswith' - поиск подстроки в конце текущей строки
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         try:
@@ -967,7 +989,7 @@ def text_file_subdelete_between(sTextFileName, sSubStrStart, sSubStrStop, sFindM
         'endswith' - поиск подстроки в конце текущей строки
     @return: True/False.
     """
-    txt_filename = normpath(sTextFileName, get_login())
+    txt_filename = normpath(sTextFileName)
     if os.path.exists(txt_filename):
         f = None
         del_flag = False
@@ -1012,7 +1034,7 @@ def text_file_subdelete_between(sTextFileName, sSubStrStart, sSubStrStop, sFindM
     return False
 
 
-INSTALL_PACKAGES_DIR_DEFAULT = '/packages/'
+INSTALL_PACKAGES_DIR_DEFAULT = 'packages'
 
 # Режимы доступа к инсталлируемым файлам/папкам
 PUBLIC_MODE = 'public'
@@ -1108,7 +1130,8 @@ def create_pth_file_programm(dPth, sInstallDir):
     if dPth['dir'] is None:
         dPth['dir'] = os.path.normpath(os.path.join(sInstallDir, dPth.get('package', '')))
 
-    return create_pth_file(dPth['name'], dPth['dir'])
+    return create_pth_file(dPth['name'], dPth['dir'],
+                           stdlib_path=dPth.get('stdlib_path', None))
 
 
 def remove_programm(dProgramm=None):
@@ -1183,8 +1206,9 @@ def targz_extract_programm(dProgramm=None, sPackageDir=INSTALL_PACKAGES_DIR_DEFA
         log.info(u'Создание инсталляционной директории <%s>' % install_dir)
         os.makedirs(install_dir)
 
-    tar_file_name = normpath(os.path.join('.', sPackageDir, dProgramm['programm']))
-    log.info(u'Полное имя файла TaGz <%s> программы для разархивирования' % tar_file_name)
+    tar_filename = os.path.join('.', sPackageDir, dProgramm['programm'])
+    tar_file_name = normpath(tar_filename)
+    log.info(u'Полное имя файла TaGz <%s> программы для разархивирования (%s)' % (tar_file_name, tar_filename))
 
     console = dProgramm.get('console', True)
     return targz_extract_to_dir(tar_file_name, install_dir, bConsole=console)
