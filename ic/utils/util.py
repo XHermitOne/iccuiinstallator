@@ -212,7 +212,7 @@ def is_apt_package_installed(package_name):
     """
     apt_pkg.init_config()
     apt_pkg.init_system()
-    return apt_pkg.Cache()[package_name].current_state == apt_pkg.INSTSTATE_REINSTREQ     # CURSTATE_INSTALLED
+    return apt_pkg.Cache()[package_name].current_state in (apt_pkg.INSTSTATE_REINSTREQ, apt_pkg.CURSTATE_INSTALLED)
 
 
 UBUNTU_DESKTOP_PACKAGE_NAME = 'ubuntu-desktop'
